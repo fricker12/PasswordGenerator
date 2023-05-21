@@ -4,10 +4,18 @@ import string
 import sys
 import logging
 
+
 def generate_password(length, character_set):
     return ''.join(random.choice(character_set) for _ in range(length))
 
+
 def generate_password_from_template(template, character_set):
+    symbol_dict = {"d": string.digits,
+                  "l": string.ascii_lowercase,
+                  "L": string.ascii_uppercase + string.ascii_lowercase,
+                  "u": string.ascii_uppercase,
+                  "p": string.punctuation}
+
     password = ''
     i = 0
     while i < len(template):
@@ -48,23 +56,27 @@ def generate_password_from_template(template, character_set):
                 password += template[i]
                 i += 1
         else:
-            if template[i] == 'd':
-                character_set = string.digits
-            elif template[i] == 'l':
-                character_set = string.ascii_lowercase
-            elif template[i] == 'L':
-                character_set = string.ascii_uppercase + string.ascii_lowercase
-            elif template[i] == 'u':
-                character_set = string.ascii_uppercase
-            elif template[i] == 'p':
-                character_set = string.punctuation
+            # if template[i] == 'd':
+            #     character_set = string.digits
+            # elif template[i] == 'l':
+            #     character_set = string.ascii_lowercase
+            # elif template[i] == 'L':
+            #     character_set = string.ascii_uppercase + string.ascii_lowercase
+            # elif template[i] == 'u':
+            #     character_set = string.ascii_uppercase
+            # elif template[i] == 'p':
+            #     character_set = string.punctuation
+
+            character_set = symbol_dict.get(template[i])
             password += random.choice(character_set)
             i += 1
     return password
 
+
 def main():
     parser = argparse.ArgumentParser(description='Password Generation Utility')
-    parser.add_argument('-n', type=int, help='Set length of password and generate random password from set {small lateral ASCII, big lateral ASCII, digit}')
+    parser.add_argument('-n', type=int,
+                        help='Set length of password and generate random password from set {small lateral ASCII, big lateral ASCII, digit}')
     parser.add_argument('-t', type=str, help='Set template for generate passwords')
     parser.add_argument('-f', type=str, help='Getting list of patterns from file and generate random password for each')
     parser.add_argument('-c', type=int, default=1, help='Number of passwords to generate')
@@ -73,13 +85,13 @@ def main():
     parser.add_argument('-v', action='count', default=0, help='Verbose mode')
     parser.add_argument('-H', action='store_true', help='Help')
     args = parser.parse_args()
-    
+
     if args.H:
         parser.print_help()
         sys.exit(0)
-        
+
     verbose_level = args.v
-    
+
     # Set logging level based on verbosity
     if verbose_level >= 3:
         logging.basicConfig(level=logging.DEBUG)
@@ -126,6 +138,7 @@ def main():
     else:
         print("Error: No option specified.")
         parser.print_help()
+
 
 if __name__ == '__main__':
     main()
