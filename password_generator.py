@@ -68,7 +68,7 @@ def generate_password_from_template(template, character_set):
             #     character_set = string.punctuation
 
             character_set = symbol_dict.get(template[i])
-            password += random.choise(character_set)
+            password += random.choice(character_set)
             i += 1
     return password
 
