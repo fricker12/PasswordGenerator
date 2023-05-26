@@ -55,9 +55,13 @@ def generate_password_from_template(template, character_set, logger):
                 if placeholder.isnumeric():
                     repeat_count = int(placeholder)
                     if i > 0 and template[i - 1] in symbol_dict:
-                        character_set = symbol_dict[template[i - 1]]
-                        password += ''.join(random.sample(character_set, repeat_count-1))
-                        logger.debug("Generating %s characters: %d", template[i - 1], repeat_count)
+                        character_set = symbol_dict[template[i - 1]] 
+                        if repeat_count - 1 < len(character_set):
+                            password += ''.join(random.sample(character_set, repeat_count-1))
+                            logger.debug("Generating %s characters: %d", template[i - 1], repeat_count)
+                        else:
+                            password += ''.join(random.choices(character_set, k=repeat_count-1))
+                            logger.debug("Generating %s characters: %d", template[i - 1], repeat_count)
                     else:
                         password += password[-1] * (repeat_count - 1)
                         logger.debug("Generated repeat character: %s", password[-1])
