@@ -12,16 +12,32 @@ def generate_password(length, character_set,logger):
     return password
 
 
-def generate_password_from_template(template, character_set,logger):
+def generate_password_from_template(template, character_set, logger):
     logger.debug("Generating password from template: %s", template)
     symbol_dict = {
         "d": string.digits,
         "l": string.ascii_lowercase,
         "L": string.ascii_uppercase + string.ascii_lowercase,
         "u": string.ascii_uppercase,
-        "p": string.punctuation
+        "p": string.punctuation,
+        'a': string.ascii_lowercase + string.digits,
+        'A': string.ascii_letters + string.digits,
+        'U': string.ascii_uppercase + string.digits,
+        'h': string.digits + 'abcdef',
+        'H': string.digits + 'ABCDEF',
+        'v': 'aeiou',
+        'V': 'AEIOUaeiou',
+        'Z': 'AEIOU',
+        'c': string.ascii_lowercase.translate(str.maketrans('', '', 'aeiou')),
+        'C': string.ascii_letters.translate(str.maketrans('', '', 'aeiou')),
+        'z': string.ascii_uppercase.translate(str.maketrans('', '', 'AEIOU')),
+        'b': '()[]{}<>',
+        's': string.printable.translate(str.maketrans('', '', string.whitespace)),
+        'S': string.printable,
+        'x': ''.join(chr(i) for i in range(0xA1, 0x100) if i != 0xAD),
+        "|": None
     }
-
+    
     password = ''
     i = 0
     while i < len(template):
@@ -38,25 +54,18 @@ def generate_password_from_template(template, character_set,logger):
                 placeholder = template[i + 1:closing_bracket_index]
                 if placeholder.isnumeric():
                     repeat_count = int(placeholder)
-                    if i > 0 and template[i - 1] == 'u':
-                        logger.debug("Generating uppercase characters: %d", repeat_count)
-                        password += ''.join(random.sample(character_set, repeat_count - 1))
-                    elif i > 0 and template[i - 1] == 'd':
-                        logger.debug("Generating digit characters: %d", repeat_count)
-                        password += ''.join(random.sample(character_set, repeat_count - 1))
-                    elif i > 0 and template[i - 1] == 'l':
-                        logger.debug("Generating lowercase characters: %d", repeat_count)
-                        password += ''.join(random.sample(character_set, repeat_count - 1))
-                    elif i > 0 and template[i - 1] == 'L':
-                        logger.debug("Generating mixed case characters: %d", repeat_count)
-                        password += ''.join(random.sample(character_set, repeat_count - 1))
-                    elif i > 0 and template[i - 1] == 'p':
-                        logger.debug("Generating punctuation characters: %d", repeat_count)
-                        password += ''.join(random.sample(character_set, repeat_count - 1))
+                    if i > 0 and template[i - 1] in symbol_dict:
+                        character_set = symbol_dict[template[i - 1]]
+                        password += ''.join(random.sample(character_set, repeat_count-1))
+                        logger.debug("Generating %s characters: %d", template[i - 1], repeat_count)
                     else:
                         password += password[-1] * (repeat_count - 1)
+                        logger.debug("Generated repeat character: %s", password[-1])
                 else:
-                    password += placeholder
+                    character_set = symbol_dict.get(placeholder)
+                    if character_set:
+                        password += random.choice(character_set)
+                        logger.debug("Generated character from set: %s", character_set)
                 i = closing_bracket_index + 1
             else:
                 password += template[i]
@@ -72,19 +81,27 @@ def generate_password_from_template(template, character_set,logger):
                     custom_set = custom_set[:caret_index] + custom_set[caret_index + 2:]
                 custom_set = [c for c in custom_set if c not in exclude_placeholders]
                 if custom_set:
-                    logger.debug("Choosing character from custom set: %s", custom_set)
                     password += random.choice(custom_set)
+                    logger.debug("Generated character from custom set: %s", custom_set)
                 i = closing_bracket_index + 1
             else:
                 password += template[i]
                 i += 1
         else:
             character_set = symbol_dict.get(template[i])
-            logger.debug("Choosing character from set: %s", character_set)
-            password += random.choice(character_set)
+            if character_set is not None:
+                if character_set == "|":
+                    choices = template[i + 1:].split("|", 1)
+                    if len(choices) == 2:
+                        choice1 = generate_password_from_template(choices[0], character_set, logger)
+                        choice2 = generate_password_from_template(choices[1], character_set, logger)
+                        password += random.choice([choice1, choice2])
+                        logger.debug("Generated choice between: %s and %s", choice1, choice2)
+                        break
+                else:
+                    password += random.choice(character_set)
+                    logger.debug("Generated character from set: %s", character_set)
             i += 1
-
-    logger.debug("Generated password from template: %s", password)
     return password
 
 
