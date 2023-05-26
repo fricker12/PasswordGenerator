@@ -39,19 +39,19 @@ def generate_password_from_template(template, character_set,logger):
                 if placeholder.isnumeric():
                     repeat_count = int(placeholder)
                     if i > 0 and template[i - 1] == 'u':
-                        logger.debug("Generating uppercase characters: %d", repeat_count - 1)
+                        logger.debug("Generating uppercase characters: %d", repeat_count)
                         password += ''.join(random.sample(character_set, repeat_count - 1))
                     elif i > 0 and template[i - 1] == 'd':
-                        logger.debug("Generating digit characters: %d", repeat_count - 1)
+                        logger.debug("Generating digit characters: %d", repeat_count)
                         password += ''.join(random.sample(character_set, repeat_count - 1))
                     elif i > 0 and template[i - 1] == 'l':
-                        logger.debug("Generating lowercase characters: %d", repeat_count - 1)
+                        logger.debug("Generating lowercase characters: %d", repeat_count)
                         password += ''.join(random.sample(character_set, repeat_count - 1))
                     elif i > 0 and template[i - 1] == 'L':
-                        logger.debug("Generating mixed case characters: %d", repeat_count - 1)
+                        logger.debug("Generating mixed case characters: %d", repeat_count)
                         password += ''.join(random.sample(character_set, repeat_count - 1))
                     elif i > 0 and template[i - 1] == 'p':
-                        logger.debug("Generating punctuation characters: %d", repeat_count - 1)
+                        logger.debug("Generating punctuation characters: %d", repeat_count)
                         password += ''.join(random.sample(character_set, repeat_count - 1))
                     else:
                         password += password[-1] * (repeat_count - 1)
